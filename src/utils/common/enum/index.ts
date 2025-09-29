@@ -1,22 +1,31 @@
 enum SYS_Role {
-    user = "user",
-    admin = "admin",
-    superAdmin = "superAdmin"
- }
- enum GENDER {
-    MALE = "male",
-    FEMALE = "female",
- 
- }
- enum USER_AGENT {
-    local = "local",
-    google = "google",
-    facebook = "facebook",
- }
- 
+  user,
+  admin,
+  superAdmin,
+}
+enum GENDER {
+  MALE,
+  FEMALE,
+  
 
- export  {
-    SYS_Role,
-    GENDER,
-    USER_AGENT
- }
+}
+enum USER_AGENT {
+  local ,
+  google ,
+  facebook ,
+}
+enum REACTION {
+    LIKE,
+    LOVE,
+    HAH,
+    WOW,
+    SAD,
+    ANGRY,
+}
+
+export  {
+  REACTION,
+  SYS_Role,
+  GENDER,
+  USER_AGENT
+}

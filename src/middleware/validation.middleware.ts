@@ -18,7 +18,7 @@ export const isValid = (schema: ZodType) => {
       return next(new AppError.BadRequestException(errorMessageString));
     }
 
-    
+
     next();
   };
 };
