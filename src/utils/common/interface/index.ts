@@ -52,8 +52,7 @@ import {REACTION} from "../enum/index";
     userId: ObjectId;
     postId: ObjectId;
     parentId?: ObjectId | null;
-    childIds: ObjectId[];
-    reaction: ObjectId[];
+    reaction: IReaction[];
     attachments?:Iattachment[];
   }
   

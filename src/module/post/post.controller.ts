@@ -7,6 +7,7 @@ const router = Router();
 router.use("/:postId/comment",commentRouter)
 router.post("/",authMiddleware,PostService.createPost )
 router.patch("/:id",authMiddleware,PostService.reaction )
-router.get("/:id",PostService.getPost )
+router.get("/:id",authMiddleware,PostService.getPost )
+router.delete("/:id",authMiddleware,PostService.deletePost )
 export default router;
 

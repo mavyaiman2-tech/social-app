@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { PostRepository } from "../../db/model/post/post.reposcitory";
-import { NotFoundException } from "../../utils/erorr";
-import { IComment } from "../../utils/common/interface";
+import { NotAuthorizedException, NotFoundException } from "../../utils/erorr";
+import { IComment,Ipost} from "../../utils/common/interface";
 import { CommentFactory } from "./factory/index";
 import { ICommentDto } from "./comment.dto";
 import { CommentRepository } from "../../db/model/comment/comment.repositoryl";
@@ -17,31 +17,65 @@ class CommentService {
     const postExist = await this.postRepository.exist({ _id: postId });
     if (!postExist) throw new NotFoundException("Post not found");
 
-    let parentComment: IComment | null = null;
+    let commentExist: IComment | any = undefined;
     if (id) {
-      parentComment = await this.commentRepository.exist({ _id: id });
-      if (!parentComment) throw new NotFoundException("Parent comment not found");
+      commentExist = await this.commentRepository.exist({ _id: id });
+   if (!commentExist) throw new NotFoundException("Parent comment not found");
+   if(commentExist.userId.toString() != req.user._id.toString()){
+    throw new NotAuthorizedException("You are not authorized to delete this comment");
+   }
     }
-
     const newComment = this.commentFactory.createComment(
       commentDto,
       req.user,
       postExist,
-      parentComment
+      commentExist
     );
 
     const createdComment = await this.commentRepository.create(newComment);
 
-    if (parentComment) {
-      await this.commentRepository.update(parentComment._id, {
-        $push: { childIds: createdComment._id },
-      });
-    }
+    
 
     return res
       .status(201)
       .json({ message: "Comment created", data: createdComment });
   };
+  getspecificComment = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const commentExist = await this.commentRepository.exist({ _id: id },{},{
+      populate:[
+        {
+          path:"replies",
+        }
+      ]
+      
+    });
+    if (!commentExist) throw new NotFoundException("Comment not found");
+    return res.status(200).json({ message: "Comment found", data: commentExist });
+  };
+  public deleteComment = async( req:Request,res:Response)=>{
+    const {id} = req.params;
+    const commentExist = await this .commentRepository.exist
+    ({ _id: id },{},{
+      populate:[
+        {
+          path:"userId"
+        },{
+          path:"postId"
+          ,select:"userId"
+        }
+      ]
+    });
+    if (!commentExist) throw new NotFoundException("Comment not found");
+    if (
+      commentExist.userId.toString() != req.user._id.toString() &&
+      (commentExist.postId as unknown as Ipost).userId.toString() != req.user._id.toString()
+    ) {
+      throw new NotAuthorizedException("You are not authorized to delete this comment");
+    }
+    await this.commentRepository.delete({_id:id}); 
+    return res.status(200).json({ message: "Comment deleted" });
+  }
 }
 
 export default new CommentService();

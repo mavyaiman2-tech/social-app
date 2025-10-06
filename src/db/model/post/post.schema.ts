@@ -4,6 +4,7 @@ import { REACTION } from "../../../utils/common/enum";
 import { IReaction } from "../../../utils/common/interface";
 import { Ipost } from "../../../utils/common/interface";
 import { reactionSchema } from "../common/reaction.schema";
+import { Comment } from "../comment/comment.model";
 // Reaction SubSchema
 ;
 
@@ -38,4 +39,18 @@ postSchema.virtual("comments",{
   ref:"Comment"
 })
 // Post Model
+// postSchema.pre("deleteOne",async function(next){
+//     const postId = this.getFilter();
+//     const fristlayer   =await Comment.find({postId:postId._id,parentId:null})
+//     if(fristlayer.length>0){
+//         for(const comment of fristlayer){
+//             await Comment.deleteOne({ postId:comment._id})
+//         }
+//     }
+//     next();
+// })
+postSchema.pre("deleteOne",async function(next){
 
+    await Comment.deleteMany({postId:this.getFilter()._id});
+    next();
+})
